@@ -1,0 +1,17 @@
+.env
+.venv/
+data/
+__pycache__/
+*.pyc
+*.egg-info/
+.DS_Store
+.cache/
+.tools/
+conversation-handoff-*.md
+course-report/build/
+course-report/*.aux
+course-report/*.bbl
+course-report/*.blg
+course-report/*.log
+course-report/*.out
+course-report/*.synctex.gz

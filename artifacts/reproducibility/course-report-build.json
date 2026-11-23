@@ -1,0 +1,12 @@
+{
+  "author_kit_commit": "12909ae437f6dbc7435069cfdb4ca44c18e6a02f",
+  "author_placeholders_remaining": [],
+  "engine": "Tectonic 0.16.9",
+  "pages": 8,
+  "pdf": "course-report/HimaRoad_Flood_Copilot_CVPR.pdf",
+  "pdf_sha256": "6ba36a0ad3fd3ed65d79b77d1be20e55d46bfc9b9df6ab0c04198b444808e41c",
+  "schema": 1,
+  "source": "course-report/main.tex",
+  "source_date_epoch": 1767225600,
+  "source_sha256": "203eabe49314e5d9a4c551795c8ee8ec6104a7316e84de96ef8421a4eee16a33"
+}

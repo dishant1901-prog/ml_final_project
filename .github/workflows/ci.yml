@@ -1,0 +1,43 @@
+name: verified-local-equivalent
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.12.15"
+          enable-cache: true
+      - name: System libraries
+        run: sudo apt-get update && sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0
+      - name: Locked environment
+        run: uv sync --locked
+      - name: Compatibility
+        run: uv pip check --python .venv/bin/python
+      - name: Compile
+        run: .venv/bin/python -m compileall -q backend src web scripts tests
+      - name: Unit and integration tests
+        env:
+          OPENBLAS_NUM_THREADS: "1"
+          OMP_NUM_THREADS: "1"
+          MPLCONFIGDIR: /tmp/himaroad-matplotlib
+        run: .venv/bin/python -m unittest discover -s tests -v
+      - name: Offline readiness
+        run: .venv/bin/python scripts/check_offline.py
+      - name: Static quality and security
+        run: |
+          uvx ruff check backend/app/api.py backend/app/settings.py backend/app/operations.py backend/app/copilot/tools.py scripts/local_worker.py scripts/local_backup.py scripts/configure_local_auth.py tests/test_operations.py tests/test_worker.py
+          uvx bandit -q -r backend/app scripts/local_worker.py scripts/local_backup.py scripts/configure_local_auth.py web/server.py -x backend/app/reports
+      - name: Dependency audit
+        run: |
+          uv export --frozen --no-dev --no-hashes --no-emit-project --format requirements-txt --output-file /tmp/requirements.txt
+          uvx pip-audit --strict --no-deps --disable-pip -r /tmp/requirements.txt

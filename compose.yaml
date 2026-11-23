@@ -1,0 +1,55 @@
+name: himaroad-internal
+
+x-common: &common
+  build: .
+  env_file: .env
+  environment: &environment
+    HIMAROAD_DATA_DIR: /data
+    DATA_ROOT: /data/copilot
+    REPORT_FONT: /data/copilot/cache/fonts/NotoSansDevanagari.ttf
+    HIMAROAD_RUNTIME: local
+    MPLCONFIGDIR: /data/cache/matplotlib
+    OPENBLAS_NUM_THREADS: "1"
+    OMP_NUM_THREADS: "1"
+  volumes:
+    - ./data:/data
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+
+services:
+  web:
+    <<: *common
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  worker:
+    <<: *common
+    command: ["python", "scripts/local_worker.py"]
+    depends_on:
+      web:
+        condition: service_healthy
+
+  workbench:
+    <<: *common
+    environment:
+      <<: *environment
+      COPILOT_API_URL: http://web:8000
+    command:
+      - streamlit
+      - run
+      - app.py
+      - --server.address=0.0.0.0
+      - --server.port=8501
+      - --server.headless=true
+      - --browser.gatherUsageStats=false
+      - --server.fileWatcherType=none
+      - --server.enableXsrfProtection=true
+      - --server.enableCORS=true
+    ports:
+      - "127.0.0.1:8501:8501"
+    depends_on:
+      web:
+        condition: service_healthy

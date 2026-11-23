@@ -1,0 +1,2 @@
+# Vendored Leaflet assets are preserved byte-for-byte from the upstream release.
+web/vendor/* -diff
